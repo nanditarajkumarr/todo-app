@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Todo App</title>
+  <style>
+    :root {
+      --bg: #f7f8fc;
+      --surface: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --primary: #2563eb;
+      --danger: #ef4444;
+      --success: #16a34a;
+      --border: #e5e7eb;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #eff6ff 0%, #f8fafc 100%);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .container {
+      width: min(100%, 760px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: 0 24px 80px rgba(15, 23, 42, 0.08);
+      padding: 28px;
+    }
+
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: clamp(1.75rem, 2.5vw, 2.25rem);
+    }
+
+    .header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .input-row input {
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      outline: none;
+      font-size: 1rem;
+      width: 100%;
+    }
+
+    .input-row input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    }
+
+    .input-row button {
+      border: none;
+      background: var(--primary);
+      color: white;
+      padding: 14px 18px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s ease;
+    }
+
+    .input-row button:hover {
+      background: #1d4ed8;
+    }
+
+    .task-section {
+      background: #ffffff;
+      border: 1px solid rgba(226, 232, 240, 0.92);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+      transition: transform 0.2s ease;
+    }
+
+    .task-section:hover {
+      transform: translateY(-2px);
+    }
+
+    .sections-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+      margin-bottom: 8px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .section-badge {
+      background: rgba(37, 99, 235, 0.1);
+      color: var(--primary);
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    .todo-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 12px;
+    }
+
+    .todo-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .todo-item.completed {
+      opacity: 0.72;
+      background: #ecfdf5;
+      text-decoration: line-through;
+    }
+
+    .todo-item:hover {
+      transform: translateY(-1px);
+    }
+
+    .todo-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .todo-content span {
+      font-size: 1rem;
+      color: inherit;
+      word-break: break-word;
+    }
+
+    .todo-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .todo-actions button {
+      border: none;
+      cursor: pointer;
+      background: transparent;
+      padding: 8px;
+      border-radius: 12px;
+      color: var(--muted);
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .todo-actions button:hover {
+      background: rgba(15, 23, 42, 0.06);
+      color: var(--text);
+    }
+
+    .todo-actions .delete {
+      color: var(--danger);
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      padding: 30px 0;
+      border-radius: 18px;
+      background: #f8fafc;
+      border: 1px dashed var(--border);
+    }
+
+    @media (max-width: 720px) {
+      .sections-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .input-row {
+        grid-template-columns: 1fr;
+      }
+
+      .input-row button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header class="header">
+      <div>
+        <h1>Todo App</h1>
+        <p>Quickly add tasks, mark them complete, and remove them.</p>
+      </div>
+    </header>
+
+    <section class="input-row">
+      <input id="taskInput" type="text" placeholder="Add new task" aria-label="Task description" />
+      <button id="addButton" type="button">Add</button>
+    </section>
+
+    <div class="sections-grid">
+      <section class="task-section">
+        <div class="section-head">
+          <h2>Pending</h2>
+          <span id="pendingCount" class="section-badge">0</span>
+        </div>
+        <ul id="pendingList" class="todo-list"></ul>
+        <div id="pendingEmpty" class="empty-state">No pending tasks. Add a new task above.</div>
+      </section>
+
+      <section class="task-section">
+        <div class="section-head">
+          <h2>Completed</h2>
+          <span id="completedCount" class="section-badge">0</span>
+        </div>
+        <ul id="completedList" class="todo-list"></ul>
+        <div id="completedEmpty" class="empty-state">No completed tasks yet.</div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const taskInput = document.getElementById('taskInput');
+    const addButton = document.getElementById('addButton');
+    const pendingList = document.getElementById('pendingList');
+    const completedList = document.getElementById('completedList');
+    const pendingEmpty = document.getElementById('pendingEmpty');
+    const completedEmpty = document.getElementById('completedEmpty');
+    const pendingCount = document.getElementById('pendingCount');
+    const completedCount = document.getElementById('completedCount');
+
+    let todos = [];
+
+    function updateSectionState(list, emptyMessage, countElement) {
+      const count = list.children.length;
+      emptyMessage.style.display = count === 0 ? 'block' : 'none';
+      countElement.textContent = count;
+    }
+
+    function renderTodos() {
+      pendingList.innerHTML = '';
+      completedList.innerHTML = '';
+
+      todos.forEach((task, index) => {
+        const item = document.createElement('li');
+        item.className = `todo-item${task.done ? ' completed' : ''}`;
+
+        const content = document.createElement('div');
+        content.className = 'todo-content';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = task.done;
+        checkbox.addEventListener('change', () => toggleTask(index));
+
+        const label = document.createElement('span');
+        label.textContent = task.text;
+
+        content.appendChild(checkbox);
+        content.appendChild(label);
+
+        const actions = document.createElement('div');
+        actions.className = 'todo-actions';
+
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'delete';
+        deleteButton.textContent = 'Delete';
+        deleteButton.addEventListener('click', () => removeTask(index));
+
+        actions.appendChild(deleteButton);
+        item.appendChild(content);
+        item.appendChild(actions);
+
+        if (task.done) {
+          completedList.appendChild(item);
+        } else {
+          pendingList.appendChild(item);
+        }
+      });
+
+      updateSectionState(pendingList, pendingEmpty, pendingCount);
+      updateSectionState(completedList, completedEmpty, completedCount);
+    }
+
+    function addTask() {
+      const text = taskInput.value.trim();
+      if (!text) return;
+
+      todos.push({ text, done: false });
+      taskInput.value = '';
+      renderTodos();
+      taskInput.focus();
+    }
+
+    function toggleTask(index) {
+      todos[index].done = !todos[index].done;
+      renderTodos();
+    }
+
+    function removeTask(index) {
+      todos.splice(index, 1);
+      renderTodos();
+    }
+
+    addButton.addEventListener('click', addTask);
+    taskInput.addEventListener('keydown', event => {
+      if (event.key === 'Enter') addTask();
+    });
+
+    renderTodos();
+  </script>
+</body>
+</html>
